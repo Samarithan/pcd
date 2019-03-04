@@ -1,0 +1,15 @@
+TCP STREAM : 0.252442
+             524340000 bytes
+	     19264 packets
+ STOP AND WAIT  0
+		524340000 bytes
+		17479 packets
+
+UDP STREAMING   0.172752
+                520770004 bytes
+		17360 packets
+
+UDP STOP AND WAIT 0.330229
+                  524340000 bytes
+                  14478 packets
+	

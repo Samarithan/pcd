@@ -8,13 +8,15 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define PORT 2024
-#define PACKET_SIZE 30000
+#define PORT 2025
+#define PACKET_SIZE  25000
 
 extern int errno;
 int bytesRead;
 int packetsNo;
 unsigned char * receivedData;
+
+int currentPacket=0;
 
 void doStreaming(int socketDesc)
 {
@@ -25,23 +27,19 @@ void doStreaming(int socketDesc)
   while(1)
   {
     retVal = read(socketDesc,data,PACKET_SIZE);
-    if(retVal<=0)
+    if(retVal < 0)
     {
-      printf("Eroare la primirea pachetelor \n ");
+     printf("Eroare la primirea pachetelor \n");
       fflush(stdout);
-      return;
+	return;
     }
+    if (retVal == 0) break;
     bytesRead += retVal;
     packetsNo++;
     counter ++;
-   // printf("Am primit pachetul %d \n",counter);
 
-    if(strcmp(data,"STOP") == 0) 
-      {
-        printf("Am primit mesajul de oprire \n");
-        fflush(stdout);
-        break;
-       } 
+    printf("Am primit pachetul %d \n",counter);
+	fflush(stdout);
   }
 }
 
@@ -52,7 +50,7 @@ int sendAck(int socketDescriptor)
 
   retVal = write(socketDescriptor,ack,3);
 
-  if(retVal <= 0)
+  if(retVal < 0)
   {
     return -1;
   }
@@ -68,32 +66,25 @@ void doStopAndWait(int socketDesc)
   while(1)
   {
     retVal = read(socketDesc,data,PACKET_SIZE);
-    if(retVal<=0)
+    if(retVal<0)
     {
       printf("Eroare la primirea pachetelor \n ");
       fflush(stdout);
-      return;
     }
 
     bytesRead += retVal;
     packetsNo ++;
     counter ++;
-   // printf("Am primit pachetul %d \n",counter);
-
+     printf("Pachetul %d a venit \n",counter);
+     if(retVal == 0) break;
     /*trimit ACK*/
     if(sendAck(socketDesc) !=0)
      {
       printf("eroare la trimiterea ACK \n");
       fflush(stdout);
       return;
-     }
+   }
 
-    if(strcmp(data,"STOP") == 0) 
-      {
-        printf("Am primit mesajul de oprire \n");
-        fflush(stdout);
-        break;
-      }
   }
 
 }

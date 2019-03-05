@@ -1,10 +1,3 @@
-/* servTCPIt.c - Exemplu de server UDP
-   Asteapta un nume de la clienti; intoarce clientului sirul
-   "Hello nume".
-   
-   Autor: Lenuta Alboaie  <adria@infoiasi.ro> (c)2009
-*/
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -53,7 +46,7 @@ void doStreaming(int sd,struct sockaddr_in client)
 
      retVal = recvfrom(sd, data, PACKET_SIZE, 0,(struct sockaddr*) &client, &length);
 
-    if(retVal<=0)
+    if(retVal<0)
     {
       printf("Eroare la primirea pachetelor \n ");
       fflush(stdout);
@@ -62,7 +55,7 @@ void doStreaming(int sd,struct sockaddr_in client)
     bytesRead += retVal;
     packetsNo ++;
     counter ++;
-    //printf("Am primit pachetul %d \n",counter);
+    printf("Am primit pachetul %d \n",counter);
 
     if(strcmp(data,"STOP") == 0) 
       {
@@ -85,16 +78,15 @@ void doStopAndWait(int sd,struct sockaddr_in client)
   while(1)
   {
     retVal = retVal = recvfrom(sd, data, PACKET_SIZE, 0,(struct sockaddr*) &client, &length);
-    if(retVal<=0)
+    if(retVal<0)
     {
       printf("Eroare la primirea pachetelor \n ");
       fflush(stdout);
-      return;
     }
     bytesRead+=retVal;
     packetsNo++;
     counter ++;
-   // printf("Am primit pachetul %d \n",counter);
+    printf("Am primit pachetul %d \n",counter);
 
     /*trimit ACK*/
     if(sendAck(sd,client) !=0)

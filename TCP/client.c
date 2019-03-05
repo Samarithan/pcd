@@ -10,7 +10,7 @@
 #include <time.h>
 
 
-#define PACKET_SIZE 30000
+#define PACKET_SIZE 1000
 
 extern int errno;
 
@@ -18,6 +18,7 @@ extern int errno;
 int port;
 char  * data;
 int dataSize;
+int sentPackages = 0;
 
 void readFile()
 {
@@ -37,12 +38,6 @@ void readFile()
 
   printf("%d",(int)retVal);
   fflush(stdout);
-
- /*
-  fileptr = fopen("replica.dat","wb");
-  fwrite(data,filelen,1,fileptr); //write replica
-  fclose(fileptr);
-  */
 }
 
 int sendPacketWrapper(char * info,int socketDescriptor,int dimension)
@@ -50,7 +45,7 @@ int sendPacketWrapper(char * info,int socketDescriptor,int dimension)
   int retVal = -1;
   retVal = write(socketDescriptor,info,dimension);
 
-  if(retVal <= 0)
+  if(retVal < 0)
     return -1;
 
   return 0;
@@ -63,7 +58,7 @@ int receivePacketWrapper(int socketDescriptor,int dimension)
 
   retVal = read(socketDescriptor,info,dimension);
 
-  if(retVal <= 0)
+  if(retVal < 0)
     return -1;
   else
   {
@@ -90,14 +85,15 @@ void doStopAndWait(int socketDescriptor)
     int counter = 1;
     int done=0;
     while(counter * PACKET_SIZE < dataSize)
-    {
+    { 
+        sentPackages += 1;
         memcpy(currentPacket,data,PACKET_SIZE);
         if(sendPacketWrapper(currentPacket,socketDescriptor,PACKET_SIZE) == -1)
         {
           printf("Eroare la trimiterea unui pachet \n");
           return;
         }
-        //printf("Am trimis pachetul %d \n",counter);
+        printf("Am trimis pachetul %d \n",counter);
         data += PACKET_SIZE;
         counter ++;
 
@@ -107,25 +103,18 @@ void doStopAndWait(int socketDescriptor)
     }
 
     data -= PACKET_SIZE;
-   //printf("am parasit bucla");
-    //fflush(stdout);
-
+  
     memcpy(currentPacket,data,dataSize-(counter-1)*PACKET_SIZE);
     if(sendPacketWrapper(currentPacket,socketDescriptor,PACKET_SIZE) == -1)
         {
           printf("Eroare la trimiterea unui pachet \n");
           return;
         }
-    strcpy(currentPacket,"STOP");
-
-    if(sendPacketWrapper(currentPacket,socketDescriptor,PACKET_SIZE) == -1)
-    {
-      printf("Eroare la trimiterea pachetului de STOP \n");
-      return;
-    }
-    printf("AM intrat de %d ori \n",counter);
+    sentPackages += 1;    
   }
-  close(socketDescriptor);
+
+  printf("done \n");
+  fflush(stdout);
 }
 
 void doStreaming(int socketDescriptor)
@@ -134,7 +123,7 @@ void doStreaming(int socketDescriptor)
   strcpy(msg,"STRMG");
 
   printf("test \n");
-  if (write (socketDescriptor, msg, strlen(msg)) <= 0)
+  if (write (socketDescriptor, msg, strlen(msg)) < 0)
   {
       printf("Eroare la trimiterea optiunii \n");
       return;
@@ -147,19 +136,17 @@ void doStreaming(int socketDescriptor)
     int done=0;
     while(counter * PACKET_SIZE < dataSize)
     {
+        sentPackages += 1;
         memcpy(currentPacket,data,PACKET_SIZE);
         if(sendPacketWrapper(currentPacket,socketDescriptor,PACKET_SIZE) == -1)
         {
           printf("Eroare la trimiterea unui pachet \n");
           return;
         }
-   //     printf("Am trimis pachetul %d \n",counter);
         data += PACKET_SIZE;
         counter ++;
     }
     data -= PACKET_SIZE;
-   // printf("am parasit bucla");
-    //fflush(stdout);
 
     memcpy(currentPacket,data,dataSize-(counter-1)*PACKET_SIZE);
     if(sendPacketWrapper(currentPacket,socketDescriptor,PACKET_SIZE) == -1)
@@ -167,13 +154,10 @@ void doStreaming(int socketDescriptor)
           printf("Eroare la trimiterea unui pachet \n");
           return;
         }
-    strcpy(currentPacket,"STOP");
 
-    if(sendPacketWrapper(currentPacket,socketDescriptor,PACKET_SIZE) == -1)
-    {
-      printf("Eroare la trimiterea pachetului de STOP \n");
-      return;
-    }
+    sentPackages += 1;
+    printf("done");
+    fflush(stdout);
   }
 }
 
@@ -217,8 +201,14 @@ int main (int argc, char *argv[])
   printf("am citit de la key %s \n ",msg);
 
   if (strcmp(msg,"STRMG") == 0)
-      doStreaming(sd);
+      {
+        doStreaming(sd);
+        printf("Am trimis %d pachete \n",sentPackages);
+      }
   else if (strcmp(msg,"STAWT") == 0)
-          doStopAndWait(sd);
+          {
+            doStopAndWait(sd);
+            printf("Am trimis %d pachete \n",sentPackages);
+          }
 }
 

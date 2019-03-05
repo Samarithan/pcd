@@ -9,7 +9,7 @@
 #include <string.h>
 #include <time.h>
 
-#define PACKET_SIZE 30000
+#define PACKET_SIZE 1000
 extern int errno;
 
 int port;
@@ -60,7 +60,7 @@ int sendPacketWrapper(char * info,int socketDescriptor,int dimension, struct soc
 void doStreaming(int sd,struct sockaddr_in server)
 {
   printf("Do Streaming");
-
+  int counter = 0;
   char * msg = (char *) calloc(20,1);
   strcpy(msg,"STRMG");
   int length = sizeof(server);
@@ -74,7 +74,7 @@ void doStreaming(int sd,struct sockaddr_in server)
   { 
     char * currentPacket = (char *) calloc(PACKET_SIZE+1,1);
     printf("**************** %d ************ \n",dataSize);
-    int counter = 1;
+    counter = 0;
     int done=0;
     while(counter * PACKET_SIZE < dataSize)
     {
@@ -106,6 +106,8 @@ void doStreaming(int sd,struct sockaddr_in server)
       return;
     }
   }
+
+  printf("Am trimis %d pachete",counter);
 }
 
 int receivePacketWrapper(int socketDescriptor,int dimension,struct sockaddr_in server)

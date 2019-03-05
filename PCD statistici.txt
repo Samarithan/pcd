@@ -1,0 +1,69 @@
+1)Comenzi
+gcc server.c -o server
+gcc client.c -o client
+
+Choose mechanism:
+	STRMG => Streaming option
+	STAWT => Stop and Wait option
+
+2) Localhost Tests
+
+TCP -Streaming / Stop and Wait
+UDP -Streaming / Stop and Wait
+
+TCP Streaming 
+1000 bytes / packet
+1.2 sec
+client -- 524288 packets sent
+server -- 1747628 packets received
+524288000 bytes sent and received
+
+TCP Stop and Wait
+1000 bytes / packet
+13.4 sec
+client -- 524287 packets sent
+server -- 1884055 packets received
+524288000 bytes sent and received
+
+UDP Streaming
+1000 bytes / packet
+1.4 sec
+client -- 524288 packets sent
+server -- 524290 packets received
+data sent :: 524288000
+data received :: 524289004
+
+UDP Stop and wait
+1000 bytes / packet
+5.44 sec
+client -- 524288 packages sent
+server -- 524289 packages received
+data received 524289000
+
+3)AWS tests
+TCP Streaming
+1000 bytes
+
+UDP Streaming
+1000 bytes
+8.88 min
+client -- 524288 packages sent
+server -- 523924 packges received
+data sent     524288000 
+data received 523923004
+
+UDP Stop and Wait
+1000 bytes
+
+
+
+TCP Streaming
+1000 bytes
+6.98 minutes
+TCP Stop and wait 
+1000 bytes
+client -- 524288 packages sent
+server -- 353560 packages received
+data received 424288000 bytes received
+
+TCP Stop and Wait
